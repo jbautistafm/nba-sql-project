@@ -1,0 +1,12 @@
+# datos originales: no se suben, se descargan con src/download_data.py
+data/raw/*
+!data/raw/.gitkeep
+
+# contraseñas de la base de datos
+.env
+config/.env
+
+# python / jupyter
+__pycache__/
+.ipynb_checkpoints/
+.venv/
