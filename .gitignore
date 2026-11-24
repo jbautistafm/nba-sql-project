@@ -10,3 +10,7 @@ config/.env
 __pycache__/
 .ipynb_checkpoints/
 .venv/
+
+# tablas limpias: las genera 02_limpieza
+data/clean/*
+!data/clean/.gitkeep
