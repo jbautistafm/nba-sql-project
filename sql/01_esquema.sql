@@ -44,6 +44,9 @@ CREATE TABLE estadisticas (
     tiros_campo            INT,
     tiros_campo_intentados INT,
     puntos                 INT,
+    rebotes_ofensivos      INT,
+    rebotes_defensivos     INT,
+    rebotes                INT,
     FOREIGN KEY (player_id) REFERENCES jugadores(player_id),
     FOREIGN KEY (temporada, equipo) REFERENCES equipos(temporada, equipo)
 );
