@@ -64,3 +64,39 @@ FROM top50 t
 JOIN jugadores j ON j.player_id = t.player_id
 GROUP BY j.posicion
 ORDER BY jugadores DESC;
+
+-- 6. Hipótesis 2: ¿al aumentar la altura se cogen más rebotes?
+--    Rebotes por 36 minutos por franjas de altura de 2 pulgadas (unos 5 cm)
+WITH carrera AS (
+    -- rebotes por 36 minutos de toda la carrera de cada jugador
+    SELECT e.player_id,
+           j.altura_pulgadas,
+           SUM(e.rebotes) * 36 / SUM(e.minutos) AS rebotes_por_36
+    FROM estadisticas e
+    JOIN jugadores j ON j.player_id = e.player_id
+    GROUP BY e.player_id, j.altura_pulgadas
+    HAVING SUM(e.minutos) >= 5000
+),
+franjas AS (
+    -- agrupo las alturas de 2 en 2 pulgadas (unos 5 cm)
+    SELECT FLOOR(altura_pulgadas / 2) * 2 AS franja_pulgadas,
+           COUNT(*) AS jugadores,
+           AVG(rebotes_por_36) AS media,
+           STDDEV(rebotes_por_36) AS desviacion,
+           MIN(rebotes_por_36) AS minimo,
+           MAX(rebotes_por_36) AS maximo
+    FROM carrera
+    GROUP BY franja_pulgadas
+    HAVING COUNT(*) >= 10   -- quito las franjas con menos de 10 jugadores, salen medias poco fiables
+)
+SELECT franja_pulgadas,
+       ROUND(franja_pulgadas * 2.54) AS desde_cm,
+       jugadores,
+       ROUND(media, 2) AS rebotes_por_36,
+       ROUND(desviacion, 2) AS desviacion,
+       ROUND(minimo, 2) AS minimo,
+       ROUND(maximo, 2) AS maximo,
+       -- LAG mira la franja anterior: si sale positivo, esta franja coge más rebotes
+       ROUND(media - LAG(media) OVER (ORDER BY franja_pulgadas), 2) AS cambio_vs_anterior
+FROM franjas
+ORDER BY franja_pulgadas;
